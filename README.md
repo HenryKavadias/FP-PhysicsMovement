@@ -1,7 +1,7 @@
 # FP-PhysicsMovement
 Template project for a First person physics based movement control system in the Unity game engine.
 
-This uses code a originally sourced from YouTube tutorials from the channel Dave / GameDevelopment (https://www.youtube.com/@davegamedevelopment). 
+This uses code originally sourced from YouTube tutorials from the channel Dave / GameDevelopment (https://www.youtube.com/@davegamedevelopment). 
 
 I recommend looking at his works and tutorials to learn how all these systems work. I've used the movement systems tied to this playlist for this project (not including the third person movement) (https://www.youtube.com/playlist?list=PLK_5K9cAPN0fB6JD7gKE3aKSKHs7Hy0GW)
 
