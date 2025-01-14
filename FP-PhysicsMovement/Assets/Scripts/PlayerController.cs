@@ -113,12 +113,15 @@ public class PlayerController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        
+        if (!characterMovementController)
+        {
+            Debug.LogError("ERROR: Missing primary movement component (Character Movement Controller).");
+            return;
+        }
 
-        if (characterMovementController)
-        { characterMovementController.SetCapabilities(
-            enableSprint, enableCrouch, enableSlide, 
-            enableClimbing, enableWallRunning, enableLedgeGrabbing,
-            enableDashing, enableGrapple, enableMonoSwing, enableDualHook); }
+        characterMovementController.SetCapabilities(
+            enableSprint, enableCrouch);
 
         // For disabling unused scripts
         if (slidingController) { slidingController.enabled = enableSlide; }
@@ -213,7 +216,10 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
         // Controls character body face rotation
         if (characterMovementController)
-        { characterMovementController.UpdateOrientationRotation(yRotation); }
+        { 
+            characterMovementController.UpdateOrientationRotation(yRotation); 
+            characterMovementController.UpdateGrappleOrientationRotation(xRotation, yRotation);
+        }
     }
 
     private void UpdateCameraFollowPoint()
@@ -232,7 +238,8 @@ public class PlayerController : MonoBehaviour
             { climbingController.HandlePlayerInputs(movementInput, jumpInput); }
 
             if (wallRunningController && enableWallRunning)
-            { wallRunningController.HandlePlayerInputs(movementInput, upwardWallRun, downwardWallRun, jumpInput); }
+            { wallRunningController.HandlePlayerInputs(
+                movementInput, upwardWallRun, downwardWallRun, jumpInput); }
 
             if (ledgeGrabbingController && enableLedgeGrabbing)
             { ledgeGrabbingController.HandlePlayerInputs(movementInput, jumpInput); }

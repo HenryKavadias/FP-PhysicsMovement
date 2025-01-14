@@ -5,8 +5,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static PlayerInputs;
 
+// Reads the players inputs
 [CreateAssetMenu(fileName = "New Input Reader", menuName = "Input/Input Reader")]
-public class InputReader : ScriptableObject, IFirstPersonControlsActions
+public class InputReader : ScriptableObject, IFPControlsActions
 {
     public event Action<Vector2> MoveEvent;
     public event Action<Vector2> LookEvent;
@@ -29,9 +30,9 @@ public class InputReader : ScriptableObject, IFirstPersonControlsActions
         if (controls == null)
         {
             controls = new PlayerInputs();
-            controls.FirstPersonControls.SetCallbacks(this);
+            controls.FPControls.SetCallbacks(this);
         }
-        controls.FirstPersonControls.Enable();
+        controls.FPControls.Enable();
     }
 
     public void OnMovement(InputAction.CallbackContext context)

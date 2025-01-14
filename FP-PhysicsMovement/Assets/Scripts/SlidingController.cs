@@ -81,7 +81,7 @@ public class SlidingController : MonoBehaviour
         Vector3 inputDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
         // Normal
-        if (!cmc.OnSlope() || rb.velocity.y > -0.1f)
+        if (!cmc.OnSlope() || rb.linearVelocity.y > -0.1f)
         {
             rb.AddForce(inputDirection.normalized * slideForce * 10f * rb.mass, ForceMode.Force);
 

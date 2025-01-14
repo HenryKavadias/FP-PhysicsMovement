@@ -153,7 +153,7 @@ public class ClimbingController : MonoBehaviour
 
     private void ClimbingMovement()
     {
-        rb.velocity = new Vector3(rb.velocity.x, climbSpeed, rb.velocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, climbSpeed, rb.linearVelocity.z);
 
         // sound effect
     }
@@ -193,7 +193,7 @@ public class ClimbingController : MonoBehaviour
 
         Vector3 forceToApply = (transform.up * climbJumpUpForce) + (frontWallHit.normal * climbJumpBackForce);
 
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(forceToApply * rb.mass, ForceMode.Impulse);
 
         climbJumpsLeft--;

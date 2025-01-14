@@ -8,7 +8,7 @@ public class CharacterMovementController : MonoBehaviour
 {
     [Header("General")]
     [SerializeField] private Transform orientation;
-
+    [SerializeField] private Transform grappleOrientation;
     private float horizontalMovement;
     private float verticalMovement;
 
@@ -17,14 +17,6 @@ public class CharacterMovementController : MonoBehaviour
 
     public bool enableSprint { get; private set; } = false;
     public bool enableCrouch { get; private set; } = false;
-    public bool enableSlide { get; private set; } = false;
-    public bool enableClimbing { get; private set; } = false;
-    public bool enableWallRunning { get; private set; } = false;
-    public bool enableLedgeGrabbing { get; private set; } = false;
-    public bool enableDashing { get; private set; } = false;
-    public bool enableGrabble { get; private set; } = false;
-    public bool enableMonoSwing { get; private set; } = false;
-    public bool enableDualSwing { get; private set; } = false;
 
     [SerializeField] private MovementState state;
     public enum MovementState
@@ -105,26 +97,10 @@ public class CharacterMovementController : MonoBehaviour
 
     public void SetCapabilities(
         bool sprint, 
-        bool crouch, 
-        bool slide, 
-        bool climb, 
-        bool wallRun,
-        bool ledgeGrab,
-        bool dashing,
-        bool grapple,
-        bool monoSwing,
-        bool dualSwing)
+        bool crouch)
     {
         enableSprint = sprint;
         enableCrouch = crouch;
-        enableSlide = slide;
-        enableClimbing = climb;
-        enableWallRunning = wallRun;
-        enableLedgeGrabbing = ledgeGrab;
-        enableDashing = dashing;
-        enableGrabble = grapple;
-        enableMonoSwing = monoSwing;
-        enableDualSwing = dualSwing;
     }
 
     private void OnDrawGizmos()
@@ -211,13 +187,11 @@ public class CharacterMovementController : MonoBehaviour
     private void SetVelocity()
     {
         enableMovementOnNextTouch = true;
-        rb.velocity = velocityToSet; 
+        rb.linearVelocity = velocityToSet; 
     }
 
     public void ResetRestrictions()
-    {
-        activeGrapple = false;
-    }
+    { activeGrapple = false; }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -226,10 +200,10 @@ public class CharacterMovementController : MonoBehaviour
             enableMovementOnNextTouch = false;
             ResetRestrictions();
 
-            if (gapC)
+            if (gapC && gapC.enabled)
             { gapC.StopGrapple(); }
 
-            if (dsc)
+            if (dsc && dsc.enabled)
             { dsc.CancelActiveGrapples(); }
         }
     }
@@ -322,7 +296,7 @@ public class CharacterMovementController : MonoBehaviour
         if (isFrozen)
         { 
             state = MovementState.Freeze; 
-            rb.velocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             desiredMoveSpeed = 0f;
         }
         // Mode - Unlimited
@@ -344,29 +318,29 @@ public class CharacterMovementController : MonoBehaviour
             desiredMoveSpeed = swingSpeed;
         }
         // Mode - Dashing
-        else if (enableDashing && isDashing)
+        else if (isDashing)
         {
             state = MovementState.Dashing;
             desiredMoveSpeed = dashSpeed;
             speedChangeFactor = dashSpeedChangeFactor;
         }
         // Mode - Climbing
-        else if (enableClimbing && isClimbing)
+        else if (isClimbing)
         {
             state = MovementState.Climbing;
             desiredMoveSpeed = climbSpeed;
         }
         // Mode - Wall Running
-        else if (enableWallRunning && isWallRunning)
+        else if (isWallRunning)
         {
             state = MovementState.WallRunning;
             desiredMoveSpeed = wallRunSpeed;
         }
         // Mode - Sliding
-        else if (enableSlide && isSliding)
+        else if (isSliding)
         {
             state = MovementState.Sliding;
-            if (OnSlope() && rb.velocity.y < 0.1f)
+            if (OnSlope() && rb.linearVelocity.y < 0.1f)
             { 
                 desiredMoveSpeed = slideSpeed; 
                 keepMomentum = true;
@@ -524,7 +498,10 @@ public class CharacterMovementController : MonoBehaviour
     public void UpdateOrientationRotation(float yRotation)
     { orientation.rotation = Quaternion.Euler(0, yRotation, 0); }
 
-    public void UpdateMovementDirection()
+    public void UpdateGrappleOrientationRotation(float x, float y)
+    { grappleOrientation.rotation = Quaternion.Euler(x, y, 0); }
+
+    private void UpdateMovementDirection()
     { 
         movementDirection = 
             (orientation.forward * verticalMovement) + 
@@ -533,7 +510,8 @@ public class CharacterMovementController : MonoBehaviour
 
     private void MoveCharacter()
     {
-        if (state == MovementState.Dashing || activeGrapple || activeSwinging)
+        if (state == MovementState.Dashing || 
+            activeGrapple || activeSwinging)
         { return; }
 
         UpdateMovementDirection();
@@ -543,7 +521,7 @@ public class CharacterMovementController : MonoBehaviour
         {
             rb.AddForce(GetSlopeMoveDirection(movementDirection) * moveSpeed * 20f * rb.mass, ForceMode.Force);
 
-            if (rb.velocity.y > 0)
+            if (rb.linearVelocity.y > 0)
             { rb.AddForce(Vector3.down * 80f, ForceMode.Force); }
         }
         // on ground
@@ -556,46 +534,46 @@ public class CharacterMovementController : MonoBehaviour
         // Turn off gravity when onslopes
         if (!isWallRunning) { rb.useGravity = !OnSlope(); }
     }
-
+    /*
     // Rate in which the agent slows down to a stop when there is no movement input
     [SerializeField, Range(0.01f, 1f)] private float decelerationRate = 0.5f;    // Must be between 0 and 1
 
     // Reduces the velocity of the game object to zero over time
     private void DecelerateVelocity()
     {
-        rb.velocity = rb.velocity * decelerationRate * Time.deltaTime;
+        rb.linearVelocity = rb.linearVelocity * decelerationRate * Time.deltaTime;
         rb.angularVelocity = rb.angularVelocity * decelerationRate * Time.deltaTime;
     }
-
+    */
     private void SpeedControl()
     {
         if (activeGrapple) { return; }
 
         if (OnSlope() && !exitingSlope)
         {
-            if (rb.velocity.magnitude > moveSpeed)
-            { rb.velocity = rb.velocity.normalized * moveSpeed; }
+            if (rb.linearVelocity.magnitude > moveSpeed)
+            { rb.linearVelocity = rb.linearVelocity.normalized * moveSpeed; }
         }
         else
         {
-            Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+            Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
             if (flatVel.magnitude > moveSpeed)
             {
                 Vector3 limitedVel = flatVel.normalized * moveSpeed;
-                rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
+                rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
             }
         }
 
-        if (maxYSpeed != 0 && rb.velocity.y > maxYSpeed)
-        { rb.velocity = new Vector3(rb.velocity.x, maxYSpeed, rb.velocity.z); }
+        if (maxYSpeed != 0 && rb.linearVelocity.y > maxYSpeed)
+        { rb.linearVelocity = new Vector3(rb.linearVelocity.x, maxYSpeed, rb.linearVelocity.z); }
     }
 
     private void Jump()
     {
         exitingSlope = true;
 
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(transform.up * jumpForce * rb.mass, ForceMode.Impulse);
     }
     
@@ -608,7 +586,6 @@ public class CharacterMovementController : MonoBehaviour
     private void ResetJump()
     {
         canJump = true;
-
         exitingSlope = false;
     }
 
@@ -618,10 +595,10 @@ public class CharacterMovementController : MonoBehaviour
             state == MovementState.Sprinting || 
             state == MovementState.Crouching ||
             state == MovementState.Sliding) && 
-            !activeGrapple && rb.drag != groundDrag)
-        { rb.drag = groundDrag; }
+            !activeGrapple && rb.linearDamping != groundDrag)
+        { rb.linearDamping = groundDrag; }
         else
-        { rb.drag = 0; }
+        { rb.linearDamping = 0; }
     }
 
     private void FixedUpdate()

@@ -112,7 +112,7 @@ public class DashingController : MonoBehaviour
     private void DelayedDashForce()
     {
         if (resetVelocity)
-        { rb.velocity = Vector3.zero; }
+        { rb.linearVelocity = Vector3.zero; }
 
         rb.AddForce(delayedForceToApply * rb.mass, ForceMode.Impulse);
     }

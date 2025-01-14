@@ -139,7 +139,7 @@ public class LedgeGrabbingController : MonoBehaviour
     // Jump is still buggy
     private void DelayedJumpForce()
     {
-        rb.velocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
 
         Vector3 forceToAdd =
             (cameraObject.forward * ledgeJumpForwardForce) +
@@ -161,7 +161,7 @@ public class LedgeGrabbingController : MonoBehaviour
         lastLedge = ledgeHit.transform;
 
         rb.useGravity = false;
-        rb.velocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
     }
 
     private void ExitLedgeHold()
@@ -193,7 +193,7 @@ public class LedgeGrabbingController : MonoBehaviour
 
         if (distanceToLedge > 1f)
         {
-            if (rb.velocity.magnitude < moveToLedgeSpeed)
+            if (rb.linearVelocity.magnitude < moveToLedgeSpeed)
             {
                 rb.AddForce(directionToLedge.normalized *
                     moveToLedgeSpeed * rb.mass * 1000f * Time.deltaTime);

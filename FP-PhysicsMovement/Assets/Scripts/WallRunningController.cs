@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO: fix the wall running limit for the same wall and
+// TODO: fix the wall running limit for the same wall and 
 // the wall run timer doesn't account for reseting on the same wall
 public class WallRunningController : MonoBehaviour
 {
@@ -146,7 +146,7 @@ public class WallRunningController : MonoBehaviour
         cmc.isWallRunning = true;
 
         wallRunTimer = maxWallRunTime;
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
     }
 
     private void StopWallRun()
@@ -169,9 +169,9 @@ public class WallRunningController : MonoBehaviour
         rb.AddForce(wallForward * wallRunForce * rb.mass, ForceMode.Force);
 
         if (upwardsRunning)
-        { rb.velocity = new Vector3(rb.velocity.x, wallClimbSpeed, rb.velocity.z); }
+        { rb.linearVelocity = new Vector3(rb.linearVelocity.x, wallClimbSpeed, rb.linearVelocity.z); }
         if (downwardsRunning)
-        { rb.velocity = new Vector3(rb.velocity.x, -wallClimbSpeed, rb.velocity.z); }
+        { rb.linearVelocity = new Vector3(rb.linearVelocity.x, -wallClimbSpeed, rb.linearVelocity.z); }
 
         if (!(wallLeft && movementInputs.x > 0) && !(wallRight && movementInputs.x > 0))
         { rb.AddForce(-wallNormal * 100f * rb.mass, ForceMode.Force); }
@@ -197,7 +197,7 @@ public class WallRunningController : MonoBehaviour
         Vector3 wallNormal = wallRight ? rightWallHit.normal : leftWallHit.normal;
         Vector3 forceToApply = (transform.up * wallJumpUpForce) + (wallNormal * wallJumpSideForce);
         
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(forceToApply * rb.mass, ForceMode.Impulse);
     }
 }
