@@ -498,13 +498,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 85842771}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.17364816, z: -0, w: 0.9848078}
+  m_LocalRotation: {x: 0.042956725, y: 0.17348288, z: -0.007574429, w: 0.98387045}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 828986058}
-  m_LocalEulerAnglesHint: {x: 0, y: 20, z: 0}
+  m_LocalEulerAnglesHint: {x: 5, y: 20, z: 0}
 --- !u!1 &90155780
 GameObject:
   m_ObjectHideFlags: 0
@@ -3600,13 +3600,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 781593979}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.17364825, z: 0, w: 0.9848078}
+  m_LocalRotation: {x: -0.042956725, y: -0.17348297, z: -0.0075744325, w: 0.98387045}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 828986058}
-  m_LocalEulerAnglesHint: {x: 0, y: -20, z: 0}
+  m_LocalEulerAnglesHint: {x: -5, y: -20, z: 0}
 --- !u!1 &783503650
 GameObject:
   m_ObjectHideFlags: 0
@@ -5927,13 +5927,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1306171536}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.17364825, z: -0, w: 0.9848078}
+  m_LocalRotation: {x: 0.042956725, y: -0.17348297, z: 0.0075744325, w: 0.98387045}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 828986058}
-  m_LocalEulerAnglesHint: {x: 0, y: -20, z: 0}
+  m_LocalEulerAnglesHint: {x: 5, y: -20, z: 0}
 --- !u!1 &1318485986
 GameObject:
   m_ObjectHideFlags: 0
@@ -6484,13 +6484,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1428917830}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.17364816, z: 0, w: 0.9848078}
+  m_LocalRotation: {x: -0.042956725, y: 0.17348288, z: 0.007574429, w: 0.98387045}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 828986058}
-  m_LocalEulerAnglesHint: {x: 0, y: 20, z: 0}
+  m_LocalEulerAnglesHint: {x: -5, y: 20, z: 0}
 --- !u!1 &1429131976
 GameObject:
   m_ObjectHideFlags: 0
@@ -8543,7 +8543,7 @@ MonoBehaviour:
   wallRunSpeed: 8.5
   grappleSpeed: 15
   swingSpeed: 15
-  airMinSpeed: 6
+  airMinSpeed: 3
   speedIncreaseMultiplier: 1.5
   slopeIncreaseMultiplier: 2.5
   groundDrag: 4

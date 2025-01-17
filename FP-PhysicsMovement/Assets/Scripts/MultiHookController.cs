@@ -80,7 +80,6 @@ public class MultiHookController : MonoBehaviour
     private void ListSetup()
     {
         amountOfSwingPoints = grapplers.Count;
-        Debug.Log("number of grapples is " + amountOfSwingPoints);
         predictionHits = new List<RaycastHit>();
 
         swingPoints = new List<Vector3>();
@@ -169,7 +168,6 @@ public class MultiHookController : MonoBehaviour
             {
                 if (joints[i])
                 {
-                    Debug.Log(i);
                     OdmGearMovement();
                     break;
                 }
