@@ -1,23 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class InputHandler : MonoBehaviour
 {
     [SerializeField] private InputReader inputReader;
 
     [SerializeField] private Transform cameraFollowPoint;
+    [SerializeField] private GameObject playerComponentHolder; // object with all the movement components
 
-    [SerializeField] private CharacterMovementController characterMovementController;
-    [SerializeField] private SlidingController slidingController;
-    [SerializeField] private ClimbingController climbingController;
-    [SerializeField] private WallRunningController wallRunningController;   // works but needs improvement
-    [SerializeField] private LedgeGrabbingController ledgeGrabbingController; // broken
-    [SerializeField] private DashingController dashingController;
-    [SerializeField] private GrapplingController grapplingController;       // redundant
-    [SerializeField] private MonoSwingingController monoSwingingController; // redundant
-    [SerializeField] private DualHookController dualHookController; // needs to be changed for 1 input and multiple hooks
+    private CharacterMovementController characterMovementController;
+    private SlidingController slidingController;
+    private ClimbingController climbingController;
+    private WallRunningController wallRunningController;   // works but needs improvement
+    private DashingController dashingController;
+    private DualHookController dualHookController; // needs to be changed for 1 input and multiple hooks
 
     [SerializeField] private bool toggleCrouch = false;
     [SerializeField] private bool toggleSprint = false;
@@ -28,11 +23,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool enableSlide = false;
     [SerializeField] private bool enableClimbing = false;
     [SerializeField] private bool enableWallRunning = false;
-    [SerializeField] private bool enableLedgeGrabbing = false;
     [SerializeField] private bool enableDashing = false;
-    [SerializeField] private bool enableDualHook = false;   
-    [SerializeField] private bool enableGrapple = false;
-    [SerializeField] private bool enableMonoSwing = false;
+
+    [SerializeField] private bool enableDualHook = false;
+    //[SerializeField] private bool enableGrapple = false;
+    //[SerializeField] private bool enableMonoSwing = false;
+
+    #region InputHandleFunctions
 
     private float xRotation;
     private float yRotation;
@@ -51,10 +48,10 @@ public class PlayerController : MonoBehaviour
     private bool sprintInput = false;
     private void HandleSprint(bool val)
     {
-        if (!toggleSprint) 
+        if (!toggleSprint)
         {
             sprintInput = val;
-            return; 
+            return;
         }
 
         if (toggleSprint && !val)
@@ -74,7 +71,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (toggleCrouch && !val) 
+        if (toggleCrouch && !val)
         { return; }
 
         if (crouchInput)
@@ -103,17 +100,47 @@ public class PlayerController : MonoBehaviour
     private bool alternateInput = false;
     private void HandleAlternate(bool val)
     { alternateInput = val; }
-
+    #endregion
     private void OnDisable()
     { UnassignInputs(); }
     private void OnEnable()
     { AssignInputs(); }
 
+    private void GetMovementComponents()
+    {
+        if (playerComponentHolder)
+        {
+            if (playerComponentHolder.TryGetComponent(out CharacterMovementController cmc))
+            {
+                characterMovementController = cmc;
+
+                if (playerComponentHolder.TryGetComponent(out SlidingController sc))
+                { slidingController = sc; }
+
+                if (playerComponentHolder.TryGetComponent(out ClimbingController cc))
+                { climbingController = cc; }
+
+                if (playerComponentHolder.TryGetComponent(out WallRunningController wrc))
+                { wallRunningController = wrc; }
+
+                if (playerComponentHolder.TryGetComponent(out DashingController dc))
+                { dashingController = dc; }
+
+                if (playerComponentHolder.TryGetComponent(out DualHookController dhc))
+                { dualHookController = dhc; }
+            }
+        }
+        else
+        { Debug.LogError("ERROR: Missing component holder, no player object assigned."); }
+    }
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
+
+        GetMovementComponents();
+
         if (!characterMovementController)
         {
             Debug.LogError("ERROR: Missing primary movement component (Character Movement Controller).");
@@ -127,41 +154,14 @@ public class PlayerController : MonoBehaviour
         if (slidingController) { slidingController.enabled = enableSlide; }
         if (climbingController) { climbingController.enabled = enableClimbing; }
         if (wallRunningController) { wallRunningController.enabled = enableWallRunning; }
-        if (ledgeGrabbingController) { ledgeGrabbingController.enabled = enableLedgeGrabbing; }
         if (dashingController) { dashingController.enabled = enableDashing; }
 
-        bool dualHookOnly = false;
-        if (dualHookController) 
-        { 
-            dualHookController.enabled = enableDualHook; 
+        if (dualHookController)
+        {
+            dualHookController.enabled = enableDualHook;
             if (enableDualHook)
             {
                 dualHookController.CreatePredictionPoints();
-                dualHookOnly = true; 
-            }
-        }
-
-        if (grapplingController) 
-        { 
-            if (dualHookOnly)
-            { grapplingController.enabled = false; }
-            else
-            { 
-                grapplingController.enabled = enableGrapple;
-                if (enableGrapple)
-                { grapplingController.CreatePredictionPoint(); }
-            }
-        }
-
-        if (monoSwingingController) 
-        { 
-            if (dualHookOnly)
-            { monoSwingingController.enabled = false; }
-            else
-            { 
-                monoSwingingController.enabled = enableMonoSwing;
-                if (enableMonoSwing)
-                { monoSwingingController.CreatePredictionPoint();}
             }
         }
     }
@@ -213,7 +213,6 @@ public class PlayerController : MonoBehaviour
 
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
     }
-
     private void CameraMove()
     {
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
@@ -226,14 +225,14 @@ public class PlayerController : MonoBehaviour
     }
 
     private void UpdateCameraFollowPoint()
-    { 
+    {
         if (!cameraFollowPoint) { return; }
-        transform.position = cameraFollowPoint.position; 
+        transform.position = cameraFollowPoint.position;
     }
     private void MovementControl()
     {
         if (characterMovementController)
-        { 
+        {
             characterMovementController.HandlePlayerInputs(
                 movementInput, jumpInput, sprintInput, crouchInput);
 
@@ -244,25 +243,18 @@ public class PlayerController : MonoBehaviour
             { climbingController.HandlePlayerInputs(movementInput, jumpInput); }
 
             if (wallRunningController && enableWallRunning)
-            { wallRunningController.HandlePlayerInputs(
-                movementInput, upwardWallRun, downwardWallRun, jumpInput); }
-
-            if (ledgeGrabbingController && enableLedgeGrabbing)
-            { ledgeGrabbingController.HandlePlayerInputs(movementInput, jumpInput); }
+            {
+                wallRunningController.HandlePlayerInputs(
+                movementInput, upwardWallRun, downwardWallRun, jumpInput);
+            }
 
             if (dashingController && enableDashing)
             { dashingController.HandlePlayerInputs(movementInput, dashInput); }
 
             if (dualHookController && enableDualHook)
-            { dualHookController.HandlePlayerInputs(
-                movementInput, jumpInput, grappleInput, swingInput, alternateInput); }
-            else
             {
-                if (grapplingController && enableGrapple)
-                { grapplingController.HandlePlayerInputs(grappleInput); }
-
-                if (monoSwingingController && enableMonoSwing)
-                { monoSwingingController.HandlePlayerInputs(movementInput, jumpInput, swingInput); }
+                dualHookController.HandlePlayerInputs(
+                movementInput, jumpInput, grappleInput, swingInput, alternateInput);
             }
         }
     }

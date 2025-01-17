@@ -92,7 +92,7 @@ public class ClimbingController : MonoBehaviour
     private void StateMachine()
     {
         // State 0 - Ledge Grabbing
-        if (lgc.isHolding)
+        if (lgc && lgc.isHolding)
         {
             if (climbing) { StopClimbing(); }
 
