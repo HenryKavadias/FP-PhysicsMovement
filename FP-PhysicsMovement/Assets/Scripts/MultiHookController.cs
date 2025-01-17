@@ -1,18 +1,27 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
+public struct Grappler
+{
+    public Transform gunTip;
+    public LineRenderer lineRenderer;
+    public Transform pointAimer;
+}
 
-public class DualHookController : MonoBehaviour
+public class MultiHookController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Transform playerCam;
-    [SerializeField] private List<Transform> gunTips;
+    [SerializeField] private List<Grappler> grapplers;
+    //[SerializeField] private List<Transform> gunTips;
     [SerializeField] private Transform player;
-    [SerializeField] private List<LineRenderer> lineRenderers;
+    //[SerializeField] private List<LineRenderer> lineRenderers;
     [SerializeField] private LayerMask whatIsGrappleable;
     private CharacterMovementController cmc;
-    
+
     [Header("Swinging")]
     [SerializeField] private float maxSwingDistance = 25f;
     [SerializeField] private float jointSpring = 4.5f;
@@ -36,7 +45,7 @@ public class DualHookController : MonoBehaviour
     private List<RaycastHit> predictionHits;
 
     [Header("Dual Swinging")]
-    [SerializeField] private List<Transform> pointAimers;
+    //[SerializeField] private List<Transform> pointAimers;
     private int amountOfSwingPoints = 2;
     private List<bool> activeSwings;
 
@@ -54,10 +63,7 @@ public class DualHookController : MonoBehaviour
     private Vector2 moveInput;
     private bool jumpInput;
     private bool alternateInput;
-    private bool leftSwingInput;
-    private bool previousLeftSwingInput = false;
-    private bool rightSwingInput;
-    private bool previousRightSwingInput = false;
+    private InputDetector grappleInput = new();
 
     private enum GrappleSide { Left, Right };
 
@@ -73,6 +79,8 @@ public class DualHookController : MonoBehaviour
 
     private void ListSetup()
     {
+        amountOfSwingPoints = grapplers.Count;
+        Debug.Log("number of grapples is " + amountOfSwingPoints);
         predictionHits = new List<RaycastHit>();
 
         swingPoints = new List<Vector3>();
@@ -103,72 +111,70 @@ public class DualHookController : MonoBehaviour
     }
 
 
-    private int InputHasChanged(GrappleSide side)
-    {
-        // with slide input
-        // false -> true is down (0)
-        // true -> false is up (1)
+    //private int InputHasChanged(GrappleSide side)
+    //{
+    //    int result = -1;
 
-        int result = -1;
+    //    if (side == GrappleSide.Left)
+    //    {
+    //        if (!previousLeftSwingInput && leftSwingInput)
+    //        { result = 0; }
+    //        else if (previousLeftSwingInput && !leftSwingInput)
+    //        { result = 1; }
 
-        if (side == GrappleSide.Left) 
-        {
-            if (!previousLeftSwingInput && leftSwingInput)
-            { result = 0; }
-            else if (previousLeftSwingInput && !leftSwingInput)
-            { result = 1; }
+    //        previousLeftSwingInput = leftSwingInput;
+    //    }
+    //    else if (side == GrappleSide.Right)
+    //    {
+    //        if (!previousRightSwingInput && rightSwingInput)
+    //        { result = 0; }
+    //        else if (previousRightSwingInput && !rightSwingInput)
+    //        { result = 1; }
 
-            previousLeftSwingInput = leftSwingInput;
-        }
-        else if (side == GrappleSide.Right)
-        {
-            if (!previousRightSwingInput && rightSwingInput)
-            { result = 0; }
-            else if (previousRightSwingInput && !rightSwingInput)
-            { result = 1; }
+    //        previousRightSwingInput = rightSwingInput;
+    //    }
 
-            previousRightSwingInput = rightSwingInput;
-        }
-
-        return result;
-    }
+    //    return result;
+    //}
 
     public void HandlePlayerInputs(
-        Vector2 move, bool jump, bool leftSwing, bool rightSwing, bool alternate)
+        Vector2 move, bool jump, 
+        bool grapple, bool alternate)
     {
         moveInput = move;
         jumpInput = jump;
-        leftSwingInput = leftSwing;
-        rightSwingInput = rightSwing;
+        grappleInput.inputState = grapple;
         alternateInput = alternate;
     }
 
     private void ManageInputs()
     {
-        int leftInputChange = InputHasChanged(GrappleSide.Left);
-        int rightInputChange = InputHasChanged(GrappleSide.Right);
+        int inputChange = grappleInput.InputHasChanged();
 
-        if (alternateInput)
-        {
-            if (leftInputChange == 0) { StartGrapple(0); }
-            if (rightInputChange == 0) { StartGrapple(1); }
-        }
+        if (false) //if (alternateInput)
+        { if (inputChange == 0) { StartGrapple(0); } }
         else
-        {
-            if (leftInputChange == 0) { StartSwing(0); }
-            if (rightInputChange == 0) { StartSwing(1); }
-        }
+        { if (inputChange == 0) { StartSwing(); } }
 
-        if (leftInputChange == 1) { StopSwing(0); }
-        if (rightInputChange == 1) { StopSwing(1); }
+        if (inputChange == 1) { StopSwing(); }
     }
 
     private void Update()
     {
         ManageInputs();
 
-        if (enableSwingingWithForces && (joints[0] || joints[1]))
-        { OdmGearMovement(); }
+        if (enableSwingingWithForces)
+        {
+            for (int i = 0; i < amountOfSwingPoints; i++)
+            {
+                if (joints[i])
+                {
+                    Debug.Log(i);
+                    OdmGearMovement();
+                    break;
+                }
+            }
+        }
 
         CheckForSwingPoints();
 
@@ -185,15 +191,15 @@ public class DualHookController : MonoBehaviour
         for (int i = 0; i < amountOfSwingPoints; i++)
         {
             if (!activeSwings[i] && !activeGrapples[i])
-            { lineRenderers[i].positionCount = 0; }
+            { grapplers[i].lineRenderer.positionCount = 0; }
             else
             {
                 currentGrapplePositions[i] = Vector3.Lerp(
                     currentGrapplePositions[i], swingPoints[i], Time.deltaTime * 8f);
 
-                lineRenderers[i].positionCount = 2;
-                lineRenderers[i].SetPosition(0, gunTips[i].position);
-                lineRenderers[i].SetPosition(1, swingPoints[i]);
+                grapplers[i].lineRenderer.positionCount = 2;
+                grapplers[i].lineRenderer.SetPosition(0, grapplers[i].gunTip.position);
+                grapplers[i].lineRenderer.SetPosition(1, swingPoints[i]);
             }
         }
     }
@@ -203,14 +209,26 @@ public class DualHookController : MonoBehaviour
     private Vector3 pullPoint;
     private void OdmGearMovement()
     {
-        if (activeSwings[0] && !activeSwings[1]) pullPoint = swingPoints[0];
-        if (activeSwings[1] && !activeSwings[0]) pullPoint = swingPoints[1];
-        // get midpoint if both swing points are active
-        if (activeSwings[0] && activeSwings[1])
+        //if (activeSwings[0] && !activeSwings[1]) pullPoint = swingPoints[0];
+        //if (activeSwings[1] && !activeSwings[0]) pullPoint = swingPoints[1];
+        //// get midpoint if both swing points are active
+        //if (activeSwings[0] && activeSwings[1])
+        //{
+        //    Vector3 dirToGrapplePoint1 = swingPoints[1] - swingPoints[0];
+        //    pullPoint = swingPoints[0] + dirToGrapplePoint1 * 0.5f;
+        //}
+
+        Vector3 directionSum = Vector3.zero;
+        int numOfActiveSwings = 0;
+
+        for (int i = 0; i < activeSwings.Count; i++)
         {
-            Vector3 dirToGrapplePoint1 = swingPoints[1] - swingPoints[0];
-            pullPoint = swingPoints[0] + dirToGrapplePoint1 * 0.5f;
+            if (!activeSwings[i]) { continue; }
+            numOfActiveSwings++;
+            directionSum += swingPoints[i];
         }
+
+        pullPoint = directionSum / numOfActiveSwings;
 
         // right
         if (moveInput.x > 0)
@@ -268,12 +286,12 @@ public class DualHookController : MonoBehaviour
             {
                 RaycastHit sphereCastHit;
                 Physics.SphereCast(
-                    pointAimers[i].position, predicitonSphereCastRadius, pointAimers[i].forward,
+                    grapplers[i].pointAimer.position, predicitonSphereCastRadius, grapplers[i].pointAimer.forward,
                     out sphereCastHit, maxSwingDistance, whatIsGrappleable);
 
                 RaycastHit raycastHit;
                 Physics.Raycast(
-                    pointAimers[i].position, pointAimers[i].forward, out raycastHit,
+                    grapplers[i].pointAimer.position, grapplers[i].pointAimer.forward, out raycastHit,
                     maxSwingDistance, whatIsGrappleable);
 
                 Vector3 realHitPoint = Vector3.zero;
@@ -301,39 +319,45 @@ public class DualHookController : MonoBehaviour
     #endregion
 
     #region Swinging
-    private void StartSwing(int swingIndex)
+    private void StartSwing()
     {
-        if (predictionHits[swingIndex].point == Vector3.zero) return;
+        for (int i = 0; i < grapplers.Count; i++)
+        {
+            if (predictionHits[i].point == Vector3.zero) continue;
+
+            activeSwings[i] = true;
+
+            swingPoints[i] = predictionHits[i].point;
+            joints[i] = player.gameObject.AddComponent<SpringJoint>();
+            joints[i].autoConfigureConnectedAnchor = false;
+            joints[i].connectedAnchor = swingPoints[i];
+
+            float distance = Vector3.Distance(
+                player.position, swingPoints[i]);
+
+            joints[i].spring = jointSpring;
+            joints[i].damper = jointDamper;
+            joints[i].massScale = jointMassScale;
+            joints[i].maxDistance = distance * 0.8f;
+            joints[i].minDistance = distance * 0.25f;
+
+            grapplers[i].lineRenderer.positionCount = 2;
+            currentGrapplePositions[i] = grapplers[i].gunTip.position;
+        }
 
         CancelActiveGrapples();
         cmc.ResetRestrictions();
 
         cmc.activeSwinging = true;
-        activeSwings[swingIndex] = true;
-
-        swingPoints[swingIndex] = predictionHits[swingIndex].point;
-        joints[swingIndex] = player.gameObject.AddComponent<SpringJoint>();
-        joints[swingIndex].autoConfigureConnectedAnchor = false;
-        joints[swingIndex].connectedAnchor = swingPoints[swingIndex];
-
-        float distanceFromPoint = Vector3.Distance(
-            player.position, swingPoints[swingIndex]);
-
-        joints[swingIndex].spring = jointSpring;
-        joints[swingIndex].damper = jointDamper;
-        joints[swingIndex].massScale = jointMassScale;
-        joints[swingIndex].maxDistance = distanceFromPoint * 0.8f;
-        joints[swingIndex].minDistance = distanceFromPoint * 0.25f;
-
-        lineRenderers[swingIndex].positionCount = 2;
-        currentGrapplePositions[swingIndex] = gunTips[swingIndex].position;
     }
 
-    public void StopSwing(int swingIndex)
+    public void StopSwing()
     {
-        CheckIfStillSwinging(swingIndex);
-        
-        Destroy(joints[swingIndex]);
+        for (int i = 0; i < grapplers.Count; i++)
+        {
+            CheckIfStillSwinging(i);
+            Destroy(joints[i]);
+        }
     }
 
     private void CheckIfStillSwinging(int swingIndex)
@@ -376,14 +400,12 @@ public class DualHookController : MonoBehaviour
             StartCoroutine(StopGrapple(grappleIndex, grappleDelayTime));
         }
 
-        lineRenderers[grappleIndex].positionCount = 2;
-        currentGrapplePositions[grappleIndex] = gunTips[grappleIndex].position;
+        grapplers[grappleIndex].lineRenderer.positionCount = 2;
+        currentGrapplePositions[grappleIndex] = grapplers[grappleIndex].gunTip.position;
     }
 
     private void DelayedFreeze()
-    {
-        cmc.isFrozen = true;
-    }
+    { cmc.isFrozen = true; }
 
     private IEnumerator ExecuteGrapple(int grappleIndex)
     {
@@ -430,8 +452,7 @@ public class DualHookController : MonoBehaviour
 
     private void CancelActiveSwings()
     {
-        StopSwing(0);
-        StopSwing(1);
+        StopSwing();
     }
     #endregion
 }

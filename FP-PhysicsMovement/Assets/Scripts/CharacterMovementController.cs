@@ -4,6 +4,29 @@ using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
+// false -> true is down button press change (0)
+// true -> false is up button release change (1)
+public struct InputDetector
+{
+    public bool inputState;
+    private bool previousInputState;
+
+    public int InputHasChanged()
+    {
+        int result = -1;
+
+        if (!previousInputState && inputState)
+        { result = 0; }
+        else if (previousInputState && !inputState)
+        { result = 1; }
+
+        previousInputState = inputState;
+
+        return result;
+    }
+}
+
 public class CharacterMovementController : MonoBehaviour
 {
     [Header("General")]
@@ -205,6 +228,9 @@ public class CharacterMovementController : MonoBehaviour
 
             if (dsc && dsc.enabled)
             { dsc.CancelActiveGrapples(); }
+
+            if (mhc && mhc.enabled)
+            { mhc.CancelActiveGrapples(); }
         }
     }
 
@@ -228,6 +254,7 @@ public class CharacterMovementController : MonoBehaviour
     private LedgeGrabbingController lgc; // this needs serious refactoring
     private GrapplingController gapC;
     private DualHookController dsc;
+    private MultiHookController mhc;
 
     private void Start()
     {
@@ -246,6 +273,9 @@ public class CharacterMovementController : MonoBehaviour
 
         if (TryGetComponent(out LedgeGrabbingController ledgCon))
         { lgc = ledgCon; }
+
+        if (TryGetComponent(out MultiHookController multiHC))
+        { mhc = multiHC; }
     }
 
     private Vector2 movementInput;

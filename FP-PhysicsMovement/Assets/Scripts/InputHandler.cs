@@ -12,7 +12,7 @@ public class InputHandler : MonoBehaviour
     private ClimbingController climbingController;
     private WallRunningController wallRunningController;   // works but needs improvement
     private DashingController dashingController;
-    private DualHookController dualHookController; // needs to be changed for 1 input and multiple hooks
+    private MultiHookController multiHookController; // needs to be changed for 1 input and multiple hooks
 
     [SerializeField] private bool toggleCrouch = false;
     [SerializeField] private bool toggleSprint = false;
@@ -25,7 +25,7 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private bool enableWallRunning = false;
     [SerializeField] private bool enableDashing = false;
 
-    [SerializeField] private bool enableDualHook = false;
+    [SerializeField] private bool enableMultiHook = false;
     //[SerializeField] private bool enableGrapple = false;
     //[SerializeField] private bool enableMonoSwing = false;
 
@@ -116,18 +116,14 @@ public class InputHandler : MonoBehaviour
 
                 if (playerComponentHolder.TryGetComponent(out SlidingController sc))
                 { slidingController = sc; }
-
                 if (playerComponentHolder.TryGetComponent(out ClimbingController cc))
                 { climbingController = cc; }
-
                 if (playerComponentHolder.TryGetComponent(out WallRunningController wrc))
                 { wallRunningController = wrc; }
-
                 if (playerComponentHolder.TryGetComponent(out DashingController dc))
                 { dashingController = dc; }
-
-                if (playerComponentHolder.TryGetComponent(out DualHookController dhc))
-                { dualHookController = dhc; }
+                if (playerComponentHolder.TryGetComponent(out MultiHookController mhc))
+                { multiHookController = mhc; }
             }
         }
         else
@@ -156,13 +152,11 @@ public class InputHandler : MonoBehaviour
         if (wallRunningController) { wallRunningController.enabled = enableWallRunning; }
         if (dashingController) { dashingController.enabled = enableDashing; }
 
-        if (dualHookController)
+        if (multiHookController)
         {
-            dualHookController.enabled = enableDualHook;
-            if (enableDualHook)
-            {
-                dualHookController.CreatePredictionPoints();
-            }
+            multiHookController.enabled = enableMultiHook;
+            if (enableMultiHook)
+            { multiHookController.CreatePredictionPoints(); }
         }
     }
 
@@ -251,10 +245,10 @@ public class InputHandler : MonoBehaviour
             if (dashingController && enableDashing)
             { dashingController.HandlePlayerInputs(movementInput, dashInput); }
 
-            if (dualHookController && enableDualHook)
+            if (multiHookController && enableMultiHook)
             {
-                dualHookController.HandlePlayerInputs(
-                movementInput, jumpInput, grappleInput, swingInput, alternateInput);
+                multiHookController.HandlePlayerInputs(
+                movementInput, jumpInput, swingInput, alternateInput);
             }
         }
     }
@@ -270,7 +264,5 @@ public class InputHandler : MonoBehaviour
     }
 
     private void LateUpdate()
-    {
-        CameraMove();
-    }
+    { CameraMove(); }
 }
