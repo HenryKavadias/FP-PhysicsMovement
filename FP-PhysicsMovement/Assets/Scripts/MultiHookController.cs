@@ -45,8 +45,6 @@ public class MultiHookController : MonoBehaviour
     private List<RaycastHit> predictionHits;
 
     [Header("Dual Swinging")]
-    //[SerializeField] private List<Transform> pointAimers;
-    private int amountOfSwingPoints = 2;
     private List<bool> activeSwings;
 
     [Header("Grappling")]
@@ -67,8 +65,6 @@ public class MultiHookController : MonoBehaviour
 
     private enum GrappleSide { Left, Right };
 
-    private List<Vector3> currentGrapplePositions;
-
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -79,7 +75,8 @@ public class MultiHookController : MonoBehaviour
 
     private void ListSetup()
     {
-        amountOfSwingPoints = grapplers.Count;
+        springs = new List<Spring>();
+
         predictionHits = new List<RaycastHit>();
 
         swingPoints = new List<Vector3>();
@@ -90,7 +87,7 @@ public class MultiHookController : MonoBehaviour
 
         currentGrapplePositions = new List<Vector3>();
 
-        for (int i = 0; i < amountOfSwingPoints; i++)
+        for (int i = 0; i < grapplers.Count; i++)
         {
             predictionHits.Add(new RaycastHit());
             joints.Add(null);
@@ -98,15 +95,17 @@ public class MultiHookController : MonoBehaviour
             activeSwings.Add(false);
             activeGrapples.Add(false);
             currentGrapplePositions.Add(Vector3.zero);
+
+            springs.Add(new Spring());
+            springs[i].Target = 0;
         }
     }
 
     public void CreatePredictionPoints()
     {
-        amountOfSwingPoints = grapplers.Count;
         predictionPoints = new List<Transform>();
 
-        for (int i = 0; i < amountOfSwingPoints; i++)
+        for (int i = 0; i < grapplers.Count; i++)
         {
             GameObject pv = Instantiate(predictionVisual);
             predictionPoints.Add(pv.transform); 
@@ -141,7 +140,7 @@ public class MultiHookController : MonoBehaviour
 
         if (enableSwingingWithForces)
         {
-            for (int i = 0; i < amountOfSwingPoints; i++)
+            for (int i = 0; i < grapplers.Count; i++)
             {
                 if (joints[i])
                 {
@@ -161,24 +160,63 @@ public class MultiHookController : MonoBehaviour
     {
         DrawRope();
     }
+
+    [Header("Rope Visuals")]
+    public int ropeQuality = 2;
+    public float strength;
+    public float damper;
+    public float velocity;
+    public float waveCount;
+    public float waveHeight;
+    public AnimationCurve affectCurve;
+    private List<Vector3> currentGrapplePositions;
+    private List<Spring> springs;
+
     private void DrawRope()
     {
-        for (int i = 0; i < amountOfSwingPoints; i++)
+        for (int i = 0; i < grapplers.Count; i++)
         {
             if (!activeSwings[i] && !activeGrapples[i])
-            { grapplers[i].lineRenderer.positionCount = 0; }
-            else
             {
-                currentGrapplePositions[i] = Vector3.Lerp(
-                    currentGrapplePositions[i], swingPoints[i], Time.deltaTime * 8f);
+                currentGrapplePositions[i] = grapplers[i].gunTip.position;
+                springs[i].Reset();
 
-                grapplers[i].lineRenderer.positionCount = 2;
-                grapplers[i].lineRenderer.SetPosition(0, grapplers[i].gunTip.position);
-                grapplers[i].lineRenderer.SetPosition(1, swingPoints[i]);
+                if (grapplers[i].lineRenderer.positionCount > 0)
+                { grapplers[i].lineRenderer.positionCount = 0; }
+
+                continue;
+            }
+
+            if (grapplers[i].lineRenderer.positionCount == 0)
+            {
+                springs[i].Velocity = velocity;
+                grapplers[i].lineRenderer.positionCount = ropeQuality + 1;
+            }
+
+            springs[i].Damper = damper;
+            springs[i].Strength = strength;
+            springs[i].Update(Time.deltaTime);
+
+            Vector3 grapplePoint = swingPoints[i];
+            Vector3 gunTipPosition = grapplers[i].gunTip.position;
+            Vector3 up = Quaternion.LookRotation((grapplePoint - gunTipPosition).normalized) * Vector3.up;
+
+            currentGrapplePositions[i] = Vector3.Lerp(
+                currentGrapplePositions[i], grapplePoint, Time.deltaTime * 12f);
+
+            for (int j = 0; j < ropeQuality + 1; j++)
+            {
+                float deltaRange = j / (float)ropeQuality;
+                Vector3 offset =
+                    up * waveHeight *
+                    Mathf.Sin(deltaRange * waveCount * Mathf.PI) *
+                    springs[i].Value * affectCurve.Evaluate(deltaRange);
+
+                grapplers[i].lineRenderer.SetPosition(j,
+                    Vector3.Lerp(gunTipPosition, currentGrapplePositions[i], deltaRange) + offset);
             }
         }
     }
-
 
     #region OdmGear
     private Vector3 pullPoint;
@@ -256,7 +294,7 @@ public class MultiHookController : MonoBehaviour
 
     private void CheckForSwingPoints()
     {
-        for (int i = 0; i < amountOfSwingPoints; i++)
+        for (int i = 0; i < grapplers.Count; i++)
         {
             if (!activeSwings[i])
             {
@@ -317,8 +355,7 @@ public class MultiHookController : MonoBehaviour
             joints[i].maxDistance = distance * 0.8f;
             joints[i].minDistance = distance * 0.25f;
 
-            grapplers[i].lineRenderer.positionCount = 2;
-            currentGrapplePositions[i] = grapplers[i].gunTip.position;
+            //SetGrappleRopeValues(i);
         }
 
         CancelActiveGrapples();
@@ -368,8 +405,7 @@ public class MultiHookController : MonoBehaviour
 
             swingPoints[i] = predictionHits[i].point;
 
-            grapplers[i].lineRenderer.positionCount = 2;
-            currentGrapplePositions[i] = grapplers[i].gunTip.position;
+            //SetGrappleRopeValues(i);
         }
 
         // ExecuteGrapple if at least one point is valid
