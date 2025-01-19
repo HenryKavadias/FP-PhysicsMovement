@@ -103,38 +103,15 @@ public class MultiHookController : MonoBehaviour
 
     public void CreatePredictionPoints()
     {
+        amountOfSwingPoints = grapplers.Count;
         predictionPoints = new List<Transform>();
 
         for (int i = 0; i < amountOfSwingPoints; i++)
-        { predictionPoints.Add(Instantiate(predictionVisual).transform); }
+        {
+            GameObject pv = Instantiate(predictionVisual);
+            predictionPoints.Add(pv.transform); 
+        }
     }
-
-
-    //private int InputHasChanged(GrappleSide side)
-    //{
-    //    int result = -1;
-
-    //    if (side == GrappleSide.Left)
-    //    {
-    //        if (!previousLeftSwingInput && leftSwingInput)
-    //        { result = 0; }
-    //        else if (previousLeftSwingInput && !leftSwingInput)
-    //        { result = 1; }
-
-    //        previousLeftSwingInput = leftSwingInput;
-    //    }
-    //    else if (side == GrappleSide.Right)
-    //    {
-    //        if (!previousRightSwingInput && rightSwingInput)
-    //        { result = 0; }
-    //        else if (previousRightSwingInput && !rightSwingInput)
-    //        { result = 1; }
-
-    //        previousRightSwingInput = rightSwingInput;
-    //    }
-
-    //    return result;
-    //}
 
     public void HandlePlayerInputs(
         Vector2 move, bool jump, 
@@ -205,17 +182,9 @@ public class MultiHookController : MonoBehaviour
 
     #region OdmGear
     private Vector3 pullPoint;
-    private void OdmGearMovement()
-    {
-        //if (activeSwings[0] && !activeSwings[1]) pullPoint = swingPoints[0];
-        //if (activeSwings[1] && !activeSwings[0]) pullPoint = swingPoints[1];
-        //// get midpoint if both swing points are active
-        //if (activeSwings[0] && activeSwings[1])
-        //{
-        //    Vector3 dirToGrapplePoint1 = swingPoints[1] - swingPoints[0];
-        //    pullPoint = swingPoints[0] + dirToGrapplePoint1 * 0.5f;
-        //}
 
+    private void FindPullPoint()
+    {
         Vector3 directionSum = Vector3.zero;
         int numOfActiveSwings = 0;
 
@@ -227,6 +196,11 @@ public class MultiHookController : MonoBehaviour
         }
 
         pullPoint = directionSum / numOfActiveSwings;
+    }
+
+    private void OdmGearMovement()
+    {
+        FindPullPoint();
 
         // right
         if (moveInput.x > 0)

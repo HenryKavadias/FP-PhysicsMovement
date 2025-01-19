@@ -199,7 +199,8 @@ public class CharacterMovementController : MonoBehaviour
     {
         activeGrapple = true;
 
-        velocityToSet = CalculateJumpVelocity(transform.position, targetPosition, trajectoryHeight);
+        velocityToSet = CalculateJumpVelocity(
+            transform.position, targetPosition, trajectoryHeight);
         Invoke(nameof(SetVelocity), 0.1f);
 
         Invoke(nameof(ResetRestrictions), 3f);
