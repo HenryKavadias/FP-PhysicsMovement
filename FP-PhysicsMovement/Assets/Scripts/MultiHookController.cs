@@ -127,8 +127,8 @@ public class MultiHookController : MonoBehaviour
     {
         int inputChange = grappleInput.InputHasChanged();
 
-        if (false) //if (alternateInput)
-        { if (inputChange == 0) { StartGrapple(0); } }
+        if (alternateInput)
+        { if (inputChange == 0) { StartGrapple(); } }
         else
         { if (inputChange == 0) { StartSwing(); } }
 
@@ -183,24 +183,28 @@ public class MultiHookController : MonoBehaviour
     #region OdmGear
     private Vector3 pullPoint;
 
-    private void FindPullPoint()
+    private void FindPullPoint(List<bool> activeHooks)
     {
         Vector3 directionSum = Vector3.zero;
         int numOfActiveSwings = 0;
 
-        for (int i = 0; i < activeSwings.Count; i++)
+        for (int i = 0; i < activeHooks.Count; i++)
         {
-            if (!activeSwings[i]) { continue; }
+            if (!activeHooks[i]) { continue; }
             numOfActiveSwings++;
             directionSum += swingPoints[i];
         }
+        if (numOfActiveSwings <= 0 || directionSum == Vector3.zero)
+        { pullPoint = Vector3.zero; }
 
         pullPoint = directionSum / numOfActiveSwings;
     }
 
     private void OdmGearMovement()
     {
-        FindPullPoint();
+        FindPullPoint(activeSwings);
+
+        if (pullPoint == Vector3.zero) { return; }
 
         // right
         if (moveInput.x > 0)
@@ -345,81 +349,81 @@ public class MultiHookController : MonoBehaviour
     #endregion
 
     #region Grappling
-    private void StartGrapple(int grappleIndex)
+    private void StartGrapple()//(int grappleIndex)
     {
         if (grapplingCdTimer > 0) return;
 
         CancelActiveSwings();
-        CancelAllGrapplesExcept(grappleIndex);
+        CancelActiveGrapples(grappleDelayTime + 0.1f);// CancelAllGrapplesExcept(grappleIndex);
 
-        // Case 1 - target point found
-        if (predictionHits[grappleIndex].point != Vector3.zero)
+        bool canGrapple = false;
+
+        for (int i = 0; i < grapplers.Count; i++)
         {
+            if (predictionHits[i].point == Vector3.zero) continue;
+
+            canGrapple = true;
+
+            activeGrapples[i] = true;
+
+            swingPoints[i] = predictionHits[i].point;
+
+            grapplers[i].lineRenderer.positionCount = 2;
+            currentGrapplePositions[i] = grapplers[i].gunTip.position;
+        }
+
+        // ExecuteGrapple if at least one point is valid
+        if (canGrapple)
+        {
+            FindPullPoint(activeGrapples);
+
             Invoke(nameof(DelayedFreeze), 0.05f);
 
-            activeGrapples[grappleIndex] = true;
-
-            swingPoints[grappleIndex] = predictionHits[grappleIndex].point;
-
-            StartCoroutine(ExecuteGrapple(grappleIndex));
+            StartCoroutine(ExecuteGrapple());
         }
-
-        // Case 2 - target point not found
-        else
-        {
-            swingPoints[grappleIndex] = playerCam.position + playerCam.forward * maxGrappleDistance;
-
-            StartCoroutine(StopGrapple(grappleIndex, grappleDelayTime));
-        }
-
-        grapplers[grappleIndex].lineRenderer.positionCount = 2;
-        currentGrapplePositions[grappleIndex] = grapplers[grappleIndex].gunTip.position;
     }
 
     private void DelayedFreeze()
     { cmc.isFrozen = true; }
 
-    private IEnumerator ExecuteGrapple(int grappleIndex)
+    private IEnumerator ExecuteGrapple()
     {
         yield return new WaitForSeconds(grappleDelayTime);
 
         cmc.isFrozen = false;
 
-        Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
+        if (pullPoint != Vector3.zero) {
+            Vector3 lowestPoint = new Vector3(
+                transform.position.x, transform.position.y - 1f, transform.position.z);
 
-        float grapplePointRelativeYPos = swingPoints[grappleIndex].y - lowestPoint.y;
-        float highestPointOnArc = grapplePointRelativeYPos + overshootYAxis;
+            float grapplePointRelativeYPos = pullPoint.y - lowestPoint.y;
+            float highestPointOnArc = grapplePointRelativeYPos + overshootYAxis;
 
-        if (grapplePointRelativeYPos < 0) highestPointOnArc = overshootYAxis;
+            if (grapplePointRelativeYPos < 0) 
+            { highestPointOnArc = overshootYAxis; }
 
-        cmc.JumpToPosition(swingPoints[grappleIndex], highestPointOnArc);
+            cmc.JumpToPosition(pullPoint, highestPointOnArc);
+        }
     }
 
-    public IEnumerator StopGrapple(int grappleIndex, float delay = 0f)
+    public IEnumerator StopGrapple(float delay = 0f)
     {
         yield return new WaitForSeconds(delay);
 
-        cmc.isFrozen = false; // may need to change, should only been when all grapples are inactive
-
+        cmc.isFrozen = false;
         cmc.ResetRestrictions();
 
-        activeGrapples[grappleIndex] = false;
-
+        for (int i = 0; i < activeGrapples.Count; i++)
+        { activeGrapples[i] = false; }
+        
         grapplingCdTimer = grapplingCd;
     }
     #endregion
 
     #region CancleAbilities
-    public void CancelActiveGrapples()
+    public void CancelActiveGrapples(float delay = 0f)
     {
-        StartCoroutine(StopGrapple(0));
-        StartCoroutine(StopGrapple(1));
-    }
-
-    private void CancelAllGrapplesExcept(int grappleIndex)
-    {
-        for (int i = 0; i < amountOfSwingPoints; i++)
-            if (i != grappleIndex) StartCoroutine(StopGrapple(i));
+        StartCoroutine(StopGrapple(delay));
     }
 
     private void CancelActiveSwings()
