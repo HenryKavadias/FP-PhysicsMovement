@@ -9,6 +9,7 @@ public struct Grappler
     public Transform gunTip;
     public LineRenderer lineRenderer;
     public Transform pointAimer;
+    public Transform gunBody;
 }
 
 public class MultiHookController : MonoBehaviour
@@ -87,6 +88,8 @@ public class MultiHookController : MonoBehaviour
 
         currentGrapplePositions = new List<Vector3>();
 
+        desiredGunRotations = new List<Quaternion>();
+
         for (int i = 0; i < grapplers.Count; i++)
         {
             predictionHits.Add(new RaycastHit());
@@ -95,6 +98,8 @@ public class MultiHookController : MonoBehaviour
             activeSwings.Add(false);
             activeGrapples.Add(false);
             currentGrapplePositions.Add(Vector3.zero);
+
+            desiredGunRotations.Add(Quaternion.identity);
 
             springs.Add(new Spring());
             springs[i].Target = 0;
@@ -159,6 +164,8 @@ public class MultiHookController : MonoBehaviour
     private void LateUpdate()
     {
         DrawRope();
+
+        RotateGrapplers();
     }
 
     [Header("Rope Visuals")]
@@ -171,12 +178,14 @@ public class MultiHookController : MonoBehaviour
     public AnimationCurve affectCurve;
     private List<Vector3> currentGrapplePositions;
     private List<Spring> springs;
+    private List<Quaternion> desiredGunRotations;
+    private float gunRotationSpeed = 5f;
 
     private void DrawRope()
     {
         for (int i = 0; i < grapplers.Count; i++)
         {
-            if (!activeSwings[i] && !activeGrapples[i])
+            if (!IsGrappling(i))
             {
                 currentGrapplePositions[i] = grapplers[i].gunTip.position;
                 springs[i].Reset();
@@ -215,6 +224,34 @@ public class MultiHookController : MonoBehaviour
                 grapplers[i].lineRenderer.SetPosition(j,
                     Vector3.Lerp(gunTipPosition, currentGrapplePositions[i], deltaRange) + offset);
             }
+        }
+    }
+
+    private bool IsGrappling(int index)
+    {
+        return activeSwings[index] || activeGrapples[index];
+    }
+
+    private void RotateGrapplers()
+    {
+        for (int i = 0; i < grapplers.Count; i++)
+        {
+            if (!grapplers[i].gunBody) { continue; }
+
+            if (IsGrappling(i))
+            {
+                desiredGunRotations[i] = 
+                    Quaternion.LookRotation(
+                        swingPoints[i] - grapplers[i].gunBody.transform.position);
+            }
+            else
+            {
+                desiredGunRotations[i] = grapplers[i].gunBody.transform.parent.rotation;
+            }
+
+            grapplers[i].gunBody.transform.rotation = 
+                Quaternion.Lerp(grapplers[i].gunBody.transform.rotation, desiredGunRotations[i], 
+                Time.deltaTime * gunRotationSpeed);
         }
     }
 
