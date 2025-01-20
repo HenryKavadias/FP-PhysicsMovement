@@ -7740,6 +7740,8 @@ MonoBehaviour:
   enableWallRunning: 0
   enableDashing: 0
   enableMultiHook: 1
+  enableGrapple: 1
+  enableRopeSwing: 1
 --- !u!1 &1746831911
 GameObject:
   m_ObjectHideFlags: 0
@@ -8706,7 +8708,6 @@ MonoBehaviour:
   maxGrappleDistance: 25
   grappleDelayTime: 0.25
   overshootYAxis: 2
-  grapplingCd: 1
   ropeQuality: 500
   strength: 800
   damper: 14
@@ -8737,6 +8738,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  grapplingCd: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

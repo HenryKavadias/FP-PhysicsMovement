@@ -55,6 +55,19 @@ public class MultiHookController : MonoBehaviour
 
     private List<bool> activeGrapples;
 
+    [Header("Rope Visuals")]
+    public int ropeQuality = 2;
+    public float strength;
+    public float damper;
+    public float velocity;
+    public float waveCount;
+    public float waveHeight;
+    public AnimationCurve affectCurve;
+    private List<Vector3> currentGrapplePositions;
+    private List<Spring> springs;
+    private List<Quaternion> desiredGunRotations;
+    private float gunRotationSpeed = 5f;
+
     [Header("Cooldown")]
     [SerializeField] private float grapplingCd;
     private float grapplingCdTimer;
@@ -64,7 +77,30 @@ public class MultiHookController : MonoBehaviour
     private bool alternateInput;
     private InputDetector grappleInput = new();
 
-    private enum GrappleSide { Left, Right };
+    private ActivationState activationState = ActivationState.Both;
+
+    private enum ActivationState
+    { 
+        None, 
+        Grapple,
+        Swing,
+        Both
+    };
+
+    public void SetActivation(bool grapple, bool swing)
+    {
+        if (grapple && swing)
+        { activationState = ActivationState.Both; }
+        else if (!grapple && swing)
+        { activationState = ActivationState.Swing; }
+        else if (grapple && !swing)
+        { activationState = ActivationState.Grapple; }
+        else
+        { 
+            activationState = ActivationState.None;
+            enabled = false;
+        }
+    }
 
     private void Start()
     {
@@ -131,12 +167,26 @@ public class MultiHookController : MonoBehaviour
     {
         int inputChange = grappleInput.InputHasChanged();
 
-        if (alternateInput)
-        { if (inputChange == 0) { StartGrapple(); } }
-        else
-        { if (inputChange == 0) { StartSwing(); } }
+        switch (activationState)
+        {
+            case ActivationState.Both:
+                if (alternateInput)
+                { if (inputChange == 0) { StartGrapple(); } }
+                else
+                { if (inputChange == 0) { StartSwing(); } }
 
-        if (inputChange == 1) { StopSwing(); }
+                if (inputChange == 1) { StopSwing(); }
+                break;
+            case ActivationState.Swing:
+                if (inputChange == 0) { StartSwing(); }
+                if (inputChange == 1) { StopSwing(); }
+                break;
+            case ActivationState.Grapple:
+                if (inputChange == 0) { StartGrapple(); }
+                break;
+            case ActivationState.None:
+                break;
+        }
     }
 
     private void Update()
@@ -167,19 +217,6 @@ public class MultiHookController : MonoBehaviour
 
         RotateGrapplers();
     }
-
-    [Header("Rope Visuals")]
-    public int ropeQuality = 2;
-    public float strength;
-    public float damper;
-    public float velocity;
-    public float waveCount;
-    public float waveHeight;
-    public AnimationCurve affectCurve;
-    private List<Vector3> currentGrapplePositions;
-    private List<Spring> springs;
-    private List<Quaternion> desiredGunRotations;
-    private float gunRotationSpeed = 5f;
 
     private void DrawRope()
     {

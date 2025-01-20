@@ -14,6 +14,7 @@ public class InputHandler : MonoBehaviour
     private DashingController dashingController;
     private MultiHookController multiHookController; // needs to be changed for 1 input and multiple hooks
 
+    [Header("Modify Movement Inputs")]
     [SerializeField] private bool toggleCrouch = false;
     [SerializeField] private bool toggleSprint = false;
 
@@ -26,8 +27,8 @@ public class InputHandler : MonoBehaviour
     [SerializeField] private bool enableDashing = false;
 
     [SerializeField] private bool enableMultiHook = false;
-    //[SerializeField] private bool enableGrapple = false;
-    //[SerializeField] private bool enableMonoSwing = false;
+    [SerializeField] private bool enableGrapple = false;
+    [SerializeField] private bool enableRopeSwing = false;
 
     #region InputHandleFunctions
 
@@ -156,7 +157,11 @@ public class InputHandler : MonoBehaviour
         {
             multiHookController.enabled = enableMultiHook;
             if (enableMultiHook)
-            { multiHookController.CreatePredictionPoints(); }
+            { 
+                multiHookController.SetActivation(enableGrapple, enableRopeSwing);
+                if (!enableRopeSwing && !enableGrapple) { return; }
+                multiHookController.CreatePredictionPoints();
+            }
         }
     }
 
