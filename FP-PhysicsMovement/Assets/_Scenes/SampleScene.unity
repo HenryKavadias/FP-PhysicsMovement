@@ -8674,15 +8674,19 @@ MonoBehaviour:
   - gunTip: {fileID: 712335040}
     lineRenderer: {fileID: 712335041}
     pointAimer: {fileID: 85842772}
+    gunBody: {fileID: 102423697}
   - gunTip: {fileID: 1429131977}
     lineRenderer: {fileID: 1429131978}
     pointAimer: {fileID: 1306171537}
+    gunBody: {fileID: 671708161}
   - gunTip: {fileID: 108760267}
     lineRenderer: {fileID: 108760268}
     pointAimer: {fileID: 781593980}
+    gunBody: {fileID: 278258515}
   - gunTip: {fileID: 1118850540}
     lineRenderer: {fileID: 1118850541}
     pointAimer: {fileID: 1428917831}
+    gunBody: {fileID: 1544927242}
   player: {fileID: 2130837596}
   whatIsGrappleable:
     serializedVersion: 2
