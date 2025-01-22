@@ -12,7 +12,7 @@ public struct InputDetector
     public bool inputState;
     private bool previousInputState;
 
-    public int InputHasChanged()
+    public int HasStateChanged()
     {
         int result = -1;
 

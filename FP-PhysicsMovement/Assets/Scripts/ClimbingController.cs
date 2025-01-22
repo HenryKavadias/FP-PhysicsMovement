@@ -53,31 +53,12 @@ public class ClimbingController : MonoBehaviour
     }
 
     private bool climbingInput;
-    private bool jumpInput;
+    private InputDetector jumpInput;
 
     public void HandlePlayerInputs(Vector2 moveInput, bool jump)
     {
         climbingInput = moveInput.y > 0f;
-        jumpInput = jump;
-    }
-
-    private bool previousJumpInput = false;
-    private int InputHasChanged()
-    {
-        // with slide input
-        // false -> true is down (0)
-        // true -> false is up (1)
-
-        int result = -1;
-
-        if (!previousJumpInput && jumpInput)
-        { result = 0; }
-        else if (previousJumpInput && !jumpInput)
-        { result = 1; }
-
-        previousJumpInput = jumpInput;
-
-        return result;
+        jumpInput.inputState = jump;
     }
 
     private void Update()
@@ -128,7 +109,7 @@ public class ClimbingController : MonoBehaviour
             if (climbing) { StopClimbing(); }
         }
 
-        if (wallFront && InputHasChanged() == 0 && climbJumpsLeft > 0) { ClimbJump(); }
+        if (wallFront && jumpInput.HasStateChanged() == 0 && climbJumpsLeft > 0) { ClimbJump(); }
     }
 
     private void WallCheck()

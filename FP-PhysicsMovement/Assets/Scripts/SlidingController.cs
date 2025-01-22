@@ -38,7 +38,7 @@ public class SlidingController : MonoBehaviour
 
     private void Update()
     {
-        int inputChange = slideInput.InputHasChanged();
+        int inputChange = slideInput.HasStateChanged();
 
         if (!cmc.isSliding && inputChange == 0 &&
             (horizontalInput != 0 || verticalInput != 0))

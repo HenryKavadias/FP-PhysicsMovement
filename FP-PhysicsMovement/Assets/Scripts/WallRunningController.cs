@@ -130,7 +130,7 @@ public class WallRunningController : MonoBehaviour
 
     private void StateMachine()
     {
-        int inputStateChange = jumpInput.InputHasChanged();
+        int inputStateChange = jumpInput.HasStateChanged();
         
         // State 1 - Wall running
         if ((wallLeft || wallRight) && 

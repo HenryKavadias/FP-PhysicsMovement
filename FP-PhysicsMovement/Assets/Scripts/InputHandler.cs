@@ -155,6 +155,7 @@ public class InputHandler : MonoBehaviour
 
         if (multiHookController)
         {
+            multiHookController.SetGrappleHookModels(enableMultiHook);
             multiHookController.enabled = enableMultiHook;
             if (enableMultiHook)
             { 

@@ -56,13 +56,14 @@ public class MultiHookController : MonoBehaviour
     private List<bool> activeGrapples;
 
     [Header("Rope Visuals")]
-    public int ropeQuality = 2;
-    public float strength;
-    public float damper;
-    public float velocity;
-    public float waveCount;
-    public float waveHeight;
-    public AnimationCurve affectCurve;
+    [SerializeField] private GameObject grappleHooksHolder;
+    [SerializeField] private int ropeQuality = 2;
+    [SerializeField] private float strength;
+    [SerializeField] private float damper;
+    [SerializeField] private float velocity;
+    [SerializeField] private float waveCount;
+    [SerializeField] private float waveHeight;
+    [SerializeField] private AnimationCurve affectCurve;
     private List<Vector3> currentGrapplePositions;
     private List<Spring> springs;
     private List<Quaternion> desiredGunRotations;
@@ -100,6 +101,11 @@ public class MultiHookController : MonoBehaviour
             activationState = ActivationState.None;
             enabled = false;
         }
+    }
+
+    public void SetGrappleHookModels(bool isEnabled)
+    {
+        if (grappleHooksHolder) { grappleHooksHolder.SetActive(isEnabled);  }
     }
 
     private void Start()
@@ -165,7 +171,7 @@ public class MultiHookController : MonoBehaviour
 
     private void ManageInputs()
     {
-        int inputChange = grappleInput.InputHasChanged();
+        int inputChange = grappleInput.HasStateChanged();
 
         switch (activationState)
         {

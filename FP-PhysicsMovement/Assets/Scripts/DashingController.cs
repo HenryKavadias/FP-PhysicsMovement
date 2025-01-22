@@ -48,7 +48,7 @@ public class DashingController : MonoBehaviour
     // Only able to dash when it's off cooldown
     private void Update()
     {
-        int inputChange = dashInput.InputHasChanged();
+        int inputChange = dashInput.HasStateChanged();
 
         if (changeOnlyDashAgainOnceGrounded && !canDashAgain)
         { canDashAgain = cmc.grounded; }
