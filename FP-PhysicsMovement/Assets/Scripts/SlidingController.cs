@@ -12,7 +12,7 @@ public class SlidingController : MonoBehaviour
 
     private float horizontalInput;
     private float verticalInput;
-    private bool slideInput;
+    private InputDetector slideInput = new();
 
     [Header("Sliding")]
     [SerializeField] private float maxSlideTime;
@@ -29,36 +29,16 @@ public class SlidingController : MonoBehaviour
         startYScale = playerModel.transform.localScale.y;
     }
 
-    private bool previousSlideInput = false;
-
-    private int InputHasChanged()
-    {
-        // with slide input
-        // false -> true is down
-        // true -> false is up
-
-        int result = -1;
-
-        if (!previousSlideInput && slideInput)
-        { result = 0; }
-        else if (previousSlideInput && !slideInput)
-        { result = 1; }
-
-        previousSlideInput = slideInput;
-
-        return result;
-    }
-
     public void HandlePlayerInputs(bool sliding, Vector2 movementInput)
     {
         horizontalInput = movementInput.x;
         verticalInput = movementInput.y;
-        slideInput = sliding;
+        slideInput.inputState = sliding;
     }
 
     private void Update()
     {
-        int inputChange = InputHasChanged();
+        int inputChange = slideInput.InputHasChanged();
 
         if (!cmc.isSliding && inputChange == 0 &&
             (horizontalInput != 0 || verticalInput != 0))

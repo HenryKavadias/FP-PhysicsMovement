@@ -174,7 +174,6 @@ public class MultiHookController : MonoBehaviour
                 { if (inputChange == 0) { StartGrapple(); } }
                 else
                 { if (inputChange == 0) { StartSwing(); } }
-
                 if (inputChange == 1) { StopSwing(); }
                 break;
             case ActivationState.Swing:
@@ -189,21 +188,29 @@ public class MultiHookController : MonoBehaviour
         }
     }
 
+    private bool CanOdm()
+    {
+        if (!enableSwingingWithForces) { return false; }
+
+        bool result = false;
+        for (int i = 0; i < grapplers.Count; i++)
+        {
+            if (joints[i])
+            {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
+    //private bool allowOdm = false;
+
     private void Update()
     {
         ManageInputs();
 
-        if (enableSwingingWithForces)
-        {
-            for (int i = 0; i < grapplers.Count; i++)
-            {
-                if (joints[i])
-                {
-                    OdmGearMovement();
-                    break;
-                }
-            }
-        }
+        
 
         CheckForSwingPoints();
 
@@ -214,8 +221,13 @@ public class MultiHookController : MonoBehaviour
     private void LateUpdate()
     {
         DrawRope();
-
         RotateGrapplers();
+    }
+
+    private void FixedUpdate()
+    {
+        if (CanOdm())
+        { OdmGearMovement(); }
     }
 
     private void DrawRope()
@@ -265,9 +277,7 @@ public class MultiHookController : MonoBehaviour
     }
 
     private bool IsGrappling(int index)
-    {
-        return activeSwings[index] || activeGrapples[index];
-    }
+    { return activeSwings[index] || activeGrapples[index]; }
 
     private void RotateGrapplers()
     {
@@ -320,20 +330,20 @@ public class MultiHookController : MonoBehaviour
 
         // right
         if (moveInput.x > 0)
-        { rb.AddForce(orientation.right * horizontalThrustForce * rb.mass * Time.deltaTime); }
+        { rb.AddForce(orientation.right * horizontalThrustForce * rb.mass); }
         // left
         if (moveInput.x < 0)
-        { rb.AddForce(-orientation.right * horizontalThrustForce * rb.mass * Time.deltaTime); }
+        { rb.AddForce(-orientation.right * horizontalThrustForce * rb.mass); }
 
         // forward
         if (moveInput.y > 0)
-        { rb.AddForce(orientation.forward * forwardThrustForce * rb.mass * Time.deltaTime); }
+        { rb.AddForce(orientation.forward * forwardThrustForce * rb.mass); }
 
         // shorten cable
         if (jumpInput)
         {
             Vector3 directionToPoint = pullPoint - transform.position;
-            rb.AddForce(directionToPoint.normalized * forwardThrustForce * rb.mass * Time.deltaTime);
+            rb.AddForce(directionToPoint.normalized * forwardThrustForce * rb.mass);
 
             // calculate the distance to the grapplePoint
             float distanceFromPoint = Vector3.Distance(transform.position, pullPoint);

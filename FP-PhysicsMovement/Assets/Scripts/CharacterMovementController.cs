@@ -553,7 +553,7 @@ public class CharacterMovementController : MonoBehaviour
             rb.AddForce(GetSlopeMoveDirection(movementDirection) * moveSpeed * 20f * rb.mass, ForceMode.Force);
 
             if (rb.linearVelocity.y > 0)
-            { rb.AddForce(Vector3.down * 80f, ForceMode.Force); }
+            { rb.AddForce(Vector3.down * 80f * rb.mass, ForceMode.Force); }
         }
         // on ground
         else if (grounded)

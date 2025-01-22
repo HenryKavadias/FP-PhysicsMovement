@@ -38,37 +38,22 @@ public class DashingController : MonoBehaviour
     }
 
     private Vector2 movementInput;
-    private bool dashInput;
-    private bool previousDashInput = false;
-    private int InputHasChanged()
-    {
-        // with slide input
-        // false -> true is down (0)
-        // true -> false is up (1)
-
-        int result = -1;
-
-        if (!previousDashInput && dashInput)
-        { result = 0; }
-        else if (previousDashInput && !dashInput)
-        { result = 1; }
-
-        previousDashInput = dashInput;
-        return result;
-    }
+    private InputDetector dashInput = new();
 
     public void HandlePlayerInputs(Vector2 movement, bool dash)
     {
-        dashInput = dash;
+        dashInput.inputState = dash;
         movementInput = movement;
     }
     // Only able to dash when it's off cooldown
     private void Update()
     {
+        int inputChange = dashInput.InputHasChanged();
+
         if (changeOnlyDashAgainOnceGrounded && !canDashAgain)
         { canDashAgain = cmc.grounded; }
 
-        if (InputHasChanged() == 0)
+        if (inputChange == 0 && !cmc.isWallRunning)
         { Dash(); }
 
         // Controls dash cooldown
@@ -79,7 +64,7 @@ public class DashingController : MonoBehaviour
     private void Dash()
     {
         // Checks dash cooldown
-        if (dashCdTimer > 0 || !canDashAgain) { return; }
+        if ((dashCdTimer > 0 || !canDashAgain)) { return; }
         else { dashCdTimer = dashCooldown; }
 
         cmc.isDashing = true;

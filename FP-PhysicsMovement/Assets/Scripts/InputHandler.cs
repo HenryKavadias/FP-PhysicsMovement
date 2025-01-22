@@ -178,7 +178,7 @@ public class InputHandler : MonoBehaviour
         inputReader.JumpEvent += HandleJump;
         inputReader.CrouchEvent += HandleCrouch;
         inputReader.SprintEvent += HandleSprint;
-        inputReader.SprintEvent += HandleUpwardsWallRun;
+        inputReader.DashEvent += HandleUpwardsWallRun;
         inputReader.SlideEvent += HandleDownwardsWallRun;
         inputReader.SlideEvent += HandleSlide;
         inputReader.DashEvent += HandleDash;
@@ -194,7 +194,7 @@ public class InputHandler : MonoBehaviour
         inputReader.JumpEvent -= HandleJump;
         inputReader.CrouchEvent -= HandleCrouch;
         inputReader.SprintEvent -= HandleSprint;
-        inputReader.SprintEvent -= HandleUpwardsWallRun;
+        inputReader.DashEvent -= HandleUpwardsWallRun;
         inputReader.SlideEvent -= HandleDownwardsWallRun;
         inputReader.SlideEvent -= HandleSlide;
         inputReader.DashEvent -= HandleDash;
@@ -261,13 +261,17 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         if (inputEnabled)
-        {
-            CameraControl();
-            MovementControl();
-        }
-        UpdateCameraFollowPoint();
+        { MovementControl(); }
+        
     }
 
     private void LateUpdate()
-    { CameraMove(); }
+    {
+        if (inputEnabled)
+        {
+            CameraControl();
+            CameraMove();
+        }
+        UpdateCameraFollowPoint();
+    }
 }

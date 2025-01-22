@@ -7737,9 +7737,9 @@ MonoBehaviour:
   enableCrouch: 0
   enableSlide: 0
   enableClimbing: 0
-  enableWallRunning: 0
+  enableWallRunning: 1
   enableDashing: 0
-  enableMultiHook: 1
+  enableMultiHook: 0
   enableGrapple: 1
   enableRopeSwing: 1
 --- !u!1 &1746831911
@@ -8699,8 +8699,8 @@ MonoBehaviour:
   jointMassScale: 4.5
   enableSwingingWithForces: 1
   orientation: {fileID: 512535604}
-  horizontalThrustForce: 2000
-  forwardThrustForce: 3000
+  horizontalThrustForce: 30
+  forwardThrustForce: 40
   extendCableSpeed: 20
   predicitonSphereCastRadius: 3
   predictionVisual: {fileID: 4458242166473988789, guid: c3a25140cd8a4ea4da8edcc51137505d,

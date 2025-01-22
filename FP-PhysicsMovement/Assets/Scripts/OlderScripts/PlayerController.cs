@@ -244,8 +244,10 @@ public class PlayerController : MonoBehaviour
             { climbingController.HandlePlayerInputs(movementInput, jumpInput); }
 
             if (wallRunningController && enableWallRunning)
-            { wallRunningController.HandlePlayerInputs(
-                movementInput, upwardWallRun, downwardWallRun, jumpInput); }
+            {
+                wallRunningController.HandlePlayerInputs(
+                movementInput, upwardWallRun, downwardWallRun, jumpInput);
+            }
 
             if (ledgeGrabbingController && enableLedgeGrabbing)
             { ledgeGrabbingController.HandlePlayerInputs(movementInput, jumpInput); }
