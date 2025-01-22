@@ -1425,7 +1425,7 @@ GameObject:
   - component: {fileID: 232643420}
   - component: {fileID: 232643419}
   m_Layer: 7
-  m_Name: Cube (6)
+  m_Name: RightWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2069,6 +2069,7 @@ MonoBehaviour:
   wallJumpSideForce: 12
   wallClimbSpeed: 8
   maxWallRunTime: 1.5
+  allowVeritcalClimbing: 0
   wallCheckDistance: 0.7
   minJumpHeight: 2
   exitWallTime: 0.2
@@ -5187,7 +5188,7 @@ Transform:
   m_GameObject: {fileID: 1082339986}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -7.69, y: -0.377, z: 11.336}
+  m_LocalPosition: {x: -4.59, y: -0.377, z: 11.336}
   m_LocalScale: {x: 2.2993, y: 2.2993, z: 2.2993}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6365,7 +6366,7 @@ GameObject:
   - component: {fileID: 1409575620}
   - component: {fileID: 1409575619}
   m_Layer: 7
-  m_Name: Cube (7)
+  m_Name: LeftWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6454,7 +6455,7 @@ Transform:
   m_GameObject: {fileID: 1409575618}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.2, y: 6.4, z: 64.6}
+  m_LocalPosition: {x: -7.1, y: 6.4, z: 64.6}
   m_LocalScale: {x: 0.31542, y: 22.15096, z: 105.83134}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7738,7 +7739,7 @@ MonoBehaviour:
   enableSlide: 0
   enableClimbing: 0
   enableWallRunning: 1
-  enableDashing: 0
+  enableDashing: 1
   enableMultiHook: 0
   enableGrapple: 1
   enableRopeSwing: 1
@@ -8612,6 +8613,7 @@ MonoBehaviour:
   wallJumpSideForce: 12
   wallClimbSpeed: 8
   maxWallRunTime: 1.5
+  allowVeritcalClimbing: 1
   wallCheckDistance: 0.7
   minJumpHeight: 2
   exitWallTime: 0.2

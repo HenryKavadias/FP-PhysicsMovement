@@ -70,8 +70,8 @@ public class WallRunningController : MonoBehaviour
     private bool AboveGround()
     { return !Physics.Raycast(transform.position, Vector3.down, minJumpHeight, whatIsGround); }
 
-    // WARNING: Does not account for which face/side of the wall you are running on, just the object '
-    // (bad if two different walls are the same object)
+    // WARNING: Does not account for which face/side of the wall you are running on, just the object
+    // (bad if two different walls are the same object) consider this: https://discussions.unity.com/t/checking-what-face-an-object-collided-with/516678/4
     private void OnCollisionEnter(Collision collision)
     {
         if (LayerMaskCheck.IsInLayerMask(collision.collider.gameObject, whatIsGround))
