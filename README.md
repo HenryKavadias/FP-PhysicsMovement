@@ -28,13 +28,13 @@ This character movement system is intended to be used as a template and modified
 
 ## Default Control Scheme (Keyboard and mouse only)
 
-Movement: WASD
-Jump: Space bar
-Sprint: X (can be toggle)
-Crouch: C (can be toggle)
-Slide: Left-CTRL
-Dash: Left-Shift
-Grapple && Rope Swing: Left-Mouse button (hold down Left-Alt for grapple when Rope swing is enabled as well)
+- Movement: WASD
+- Jump: Space bar
+- Sprint: X (can be toggle)
+- Crouch: C (can be toggle)
+- Slide: Left-CTRL
+- Dash: Left-Shift
+- Grapple && Rope Swing: Left-Mouse button (hold down Left-Alt for grapple when Rope swing is enabled as well)
 
 ## Details For Movement Abilities
 
