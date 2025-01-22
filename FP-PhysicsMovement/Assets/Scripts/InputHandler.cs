@@ -3,9 +3,9 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     [SerializeField] private InputReader inputReader;
-
-    [SerializeField] private Transform cameraFollowPoint;
-    [SerializeField] private GameObject playerComponentHolder; // object with all the movement components
+    [SerializeField] private GameObject playerCamera;
+    private Transform cameraFollowPoint;
+    private GameObject playerComponentHolder; // object with all the movement components
 
     private CharacterMovementController characterMovementController;
     private SlidingController slidingController;
@@ -131,10 +131,15 @@ public class InputHandler : MonoBehaviour
         { Debug.LogError("ERROR: Missing component holder, no player object assigned."); }
     }
 
-    private void Start()
+    public void AssignAndSetupPlayerCharacter(GameObject player = null)
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if (player) { playerComponentHolder = player; }
+
+        if (!playerComponentHolder) 
+        {
+            Debug.LogError("ERROR: Missing player character object"); 
+            return; 
+        }
 
         GetMovementComponents();
 
@@ -144,6 +149,19 @@ public class InputHandler : MonoBehaviour
             return;
         }
 
+        cameraFollowPoint = characterMovementController.GetCameraPoint();
+
+        if (!cameraFollowPoint)
+        {
+            Debug.LogError("ERROR: Missing camera follow point, camera can't follow the player.");
+            return;
+        }
+
+        SetUpCapabilities();
+    }
+
+    private void SetUpCapabilities()
+    {
         characterMovementController.SetCapabilities(
             enableSprint, enableCrouch);
 
@@ -151,19 +169,31 @@ public class InputHandler : MonoBehaviour
         if (slidingController) { slidingController.enabled = enableSlide; }
         if (climbingController) { climbingController.enabled = enableClimbing; }
         if (wallRunningController) { wallRunningController.enabled = enableWallRunning; }
-        if (dashingController) { dashingController.enabled = enableDashing; }
+        if (dashingController) 
+        { 
+            dashingController.enabled = enableDashing; 
+            // assign camera transform if enabled
+            dashingController.SetPlayerCamera(playerCamera.transform);
+        }
 
         if (multiHookController)
         {
             multiHookController.SetGrappleHookModels(enableMultiHook);
             multiHookController.enabled = enableMultiHook;
             if (enableMultiHook)
-            { 
+            {
+                dashingController.SetPlayerCamera(playerCamera.transform);
                 multiHookController.SetActivation(enableGrapple, enableRopeSwing);
                 if (!enableRopeSwing && !enableGrapple) { return; }
                 multiHookController.CreatePredictionPoints();
             }
         }
+    }
+
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     private void ResetInputValues()

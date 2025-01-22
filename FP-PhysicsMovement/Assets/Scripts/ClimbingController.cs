@@ -123,7 +123,8 @@ public class ClimbingController : MonoBehaviour
             whatIsWall);
         wallLookAngle = Vector3.Angle(orientation.forward, -frontWallHit.normal);
 
-        bool newWall = frontWallHit.transform != lastWall || Mathf.Abs(Vector3.Angle(lastWallNormal, frontWallHit.normal)) > minWallNormalAngleChange;
+        bool newWall = frontWallHit.transform != lastWall || 
+            Mathf.Abs(Vector3.Angle(lastWallNormal, frontWallHit.normal)) > minWallNormalAngleChange;
 
         if ((wallFront && newWall) || cmc.grounded) 
         { 

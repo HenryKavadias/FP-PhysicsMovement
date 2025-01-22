@@ -15,14 +15,11 @@ public struct InputDetector
     public int HasStateChanged()
     {
         int result = -1;
-
         if (!previousInputState && inputState)
         { result = 0; }
         else if (previousInputState && !inputState)
         { result = 1; }
-
         previousInputState = inputState;
-
         return result;
     }
 }
@@ -124,6 +121,18 @@ public class CharacterMovementController : MonoBehaviour
     {
         enableSprint = sprint;
         enableCrouch = crouch;
+    }
+
+    [Header("Camera Position")]
+    public Transform cameraPoint;
+    public Transform playerCameraTransform { get; private set; }
+    
+    public Transform GetCameraPoint()
+    {
+        if (cameraPoint)
+        { return cameraPoint; }
+
+        return null;
     }
 
     private void OnDrawGizmos()
@@ -406,7 +415,8 @@ public class CharacterMovementController : MonoBehaviour
                 desiredMoveSpeed = airMinSpeed;
         }
 
-        bool desiredMoveSpeedHasChanged = desiredMoveSpeed != lastDesiredMoveSpeed;
+        bool desiredMoveSpeedHasChanged = 
+            desiredMoveSpeed != lastDesiredMoveSpeed;
 
         if (lastState == MovementState.Dashing)
         { keepMomentum = true; }
@@ -514,7 +524,10 @@ public class CharacterMovementController : MonoBehaviour
             if (grounded || (!grounded && jumpCount < jumpLimit))
             {
                 if (!grounded && jumpCount == 0)
-                { jumpCount++; }
+                { 
+                    if (jumpLimit <= 1) { return; }
+                    jumpCount++; 
+                }
 
                 canJump = false;
                 Jump();

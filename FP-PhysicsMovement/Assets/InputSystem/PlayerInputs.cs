@@ -232,7 +232,7 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""c386abc9-c1c2-4121-b035-f9879f73682c"",
-                    ""path"": ""<Keyboard>/shift"",
+                    ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";KeyboardAndMouse"",
@@ -312,7 +312,6 @@ public partial class @PlayerInputs: IInputActionCollection2, IDisposable
     ~@PlayerInputs()
     {
         //UnityEngine.Debug.Assert(!m_FPControls.enabled, "This will cause a leak and performance issues, PlayerInputs.FPControls.Disable() has not been called.");
-        // This always goes off, bug in Unity 6, hasn't been fixed yet
     }
 
     public void Dispose()

@@ -15,13 +15,15 @@ public struct Grappler
 public class MultiHookController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform playerCam;
     [SerializeField] private List<Grappler> grapplers;
     //[SerializeField] private List<Transform> gunTips;
     [SerializeField] private Transform player;
     //[SerializeField] private List<LineRenderer> lineRenderers;
     [SerializeField] private LayerMask whatIsGrappleable;
     private CharacterMovementController cmc;
+    private Transform playerCam;
+    public void SetPlayerCamera(Transform cam)
+    { playerCam = cam; }
 
     [Header("Swinging")]
     [SerializeField] private float maxSwingDistance = 25f;
@@ -210,13 +212,9 @@ public class MultiHookController : MonoBehaviour
         return result;
     }
 
-    //private bool allowOdm = false;
-
     private void Update()
     {
         ManageInputs();
-
-        
 
         CheckForSwingPoints();
 

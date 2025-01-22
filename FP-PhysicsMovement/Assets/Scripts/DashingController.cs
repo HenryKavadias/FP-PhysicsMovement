@@ -8,7 +8,7 @@ public class DashingController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Transform orientation;
-    [SerializeField] private Transform playerCam;
+    private Transform playerCam;
     private Rigidbody rb;
     private CharacterMovementController cmc;
 
@@ -23,7 +23,7 @@ public class DashingController : MonoBehaviour
     [SerializeField] private bool allowAllDirections = true;
     [SerializeField] private bool disableGravity = false;
     [SerializeField] private bool resetVelocity = true;
-    [SerializeField] private bool changeOnlyDashAgainOnceGrounded = false;
+    [SerializeField] private bool canOnlyDashAgainOnceGrounded = false;
 
     private bool canDashAgain = true;
 
@@ -36,6 +36,9 @@ public class DashingController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         cmc = GetComponent<CharacterMovementController>();
     }
+
+    public void SetPlayerCamera(Transform cam)
+    { playerCam = cam; }
 
     private Vector2 movementInput;
     private InputDetector dashInput = new();
@@ -50,7 +53,7 @@ public class DashingController : MonoBehaviour
     {
         int inputChange = dashInput.HasStateChanged();
 
-        if (changeOnlyDashAgainOnceGrounded && !canDashAgain)
+        if (canOnlyDashAgainOnceGrounded && !canDashAgain)
         { canDashAgain = cmc.grounded; }
 
         if (inputChange == 0 && !cmc.isWallRunning)
@@ -82,7 +85,7 @@ public class DashingController : MonoBehaviour
         if (disableGravity)
         { rb.useGravity = false; }
 
-        if (changeOnlyDashAgainOnceGrounded)
+        if (canOnlyDashAgainOnceGrounded)
         { canDashAgain = false; }
 
         // Applies the force and invokes the required functions under a delay
