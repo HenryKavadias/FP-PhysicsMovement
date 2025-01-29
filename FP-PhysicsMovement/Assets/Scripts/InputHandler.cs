@@ -35,7 +35,7 @@ public class InputHandler : MonoBehaviour
     private float xRotation;
     private float yRotation;
 
-    bool inputEnabled = false;
+    private bool inputEnabled = false;
 
     private Vector2 movementInput = Vector2.zero;
     private void HandleMove(Vector2 val)
@@ -293,7 +293,6 @@ public class InputHandler : MonoBehaviour
     {
         if (inputEnabled)
         { MovementControl(); }
-        
     }
 
     private void LateUpdate()
